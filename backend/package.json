@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "aws-jwt-verify": "^5.2.1",
     "dotenv": "^18.0.8",
     "mongoose": "^9.11.2"
   }
