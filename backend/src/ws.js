@@ -84,7 +84,7 @@ async function onSendMessage(event) {
   if (!sender) return { statusCode: 403, body: "Unknown connection" };
 
   const type = body.type === "dm" ? "dm" : "room";
-  let conversationId, targetFilter;
+  let conversationId, targetFilter, participants;
 
   if (type === "dm") {
     // typeof check blocks NoSQL operator injection like {"$ne": ""}
@@ -93,6 +93,11 @@ async function onSendMessage(event) {
       await reply(event, { type: "error", message: "User not found" });
       return ok();
     }
+    if (target.userId === sender.userId) {
+      await reply(event, { type: "error", message: "You can't message yourself" });
+      return ok();
+    }
+    participants = [sender.userId, target.userId];
     conversationId = dmId(sender.userId, target.userId);
     targetFilter = { userId: { $in: [sender.userId, target.userId] } };   // both people, all their tabs
   } else {
@@ -105,7 +110,7 @@ async function onSendMessage(event) {
   }
 
   const msg = await Message.create({
-    conversationId, type, senderId: sender.userId, senderName: sender.username, content,
+    conversationId, type, participants, senderId: sender.userId, senderName: sender.username, content,
   });
 
   const targets = await Connection.find(targetFilter).select("connectionId").lean();

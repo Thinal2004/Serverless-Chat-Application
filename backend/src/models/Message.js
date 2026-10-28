@@ -6,9 +6,10 @@ const messageSchema = new mongoose.Schema({
   senderId: { type: String, required: true },
   senderName: { type: String, required: true },
   content: { type: String, required: true, trim: true, maxlength: 2000 },
+  participants: { type: [String], default: undefined },   // only set for DMs
   timestamp: { type: Date, default: Date.now },
 });
 
-messageSchema.index({ conversationId: 1, timestamp: -1 });
+messageSchema.index({ participants: 1, timestamp: -1 });
 
 module.exports = mongoose.models.Message || mongoose.model("Message", messageSchema);
